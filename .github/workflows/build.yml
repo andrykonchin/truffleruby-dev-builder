@@ -18,8 +18,8 @@ jobs:
     - name: Clone truffleruby
       uses: actions/checkout@v4
       with:
-        repository: oracle/truffleruby
-        ref: ${{ needs.prepare.outputs.commit }}
+        repository: andrykonchin/truffleruby
+        ref: ak/revert-openssl-changes
 
     - name: Set platform
       id: platform
