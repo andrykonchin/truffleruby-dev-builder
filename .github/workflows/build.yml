@@ -79,7 +79,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-20.04, ubuntu-22.04, ubuntu-24.04, ubuntu-22.04-arm, ubuntu-24.04-arm, macos-13, macos-14 ]
-        name: [ '-head', '+graalvm-head' ]
+        name: [ '-head', '+graalvm-head', '+graalvm-ea' ]
+    continue-on-error: ${{ matrix.name == '+graalvm-ea' }}
     runs-on: ${{ matrix.os }}
     steps:
     - name: Clone truffleruby
@@ -87,6 +88,10 @@ jobs:
       with:
         repository: oracle/truffleruby
         ref: ${{ needs.prepare.outputs.commit }}
+    - uses: actions/checkout@v4
+      with:
+        path: truffleruby-dev-builder
+      if: matrix.name == '+graalvm-ea'
 
     - name: Set platform
       id: platform
@@ -130,12 +135,17 @@ jobs:
     - name: Build TruffleRuby (jvm)
       run: jt build --env jvm-ce-libgraal
       if: matrix.name == '+graalvm-head'
+    - name: Build TruffleRuby (jvm-ea)
+      run: ruby truffleruby-dev-builder/ea-build-with-truffleruby-master.rb
+      if: matrix.name == '+graalvm-ea'
 
     - run: mkdir -p ~/.rubies
     - run: mv $(jt mx --env native standalone-home --type=native ruby) ~/.rubies/truffleruby${{ matrix.name }}
       if: matrix.name == '-head'
     - run: mv $(jt mx --env jvm-ce-libgraal standalone-home --type=jvm ruby) ~/.rubies/truffleruby${{ matrix.name }}
       if: matrix.name == '+graalvm-head'
+    - run: mv truffleruby-jvm-ea-master-build ~/.rubies/truffleruby${{ matrix.name }}
+      if: matrix.name == '+graalvm-ea'
     - name: Create archive
       run: tar czf truffleruby${{ matrix.name }}-${{ steps.platform.outputs.platform }}.tar.gz -C ~/.rubies truffleruby${{ matrix.name }}
 
