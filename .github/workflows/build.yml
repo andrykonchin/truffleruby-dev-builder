@@ -19,8 +19,8 @@ jobs:
     - name: Clone truffleruby
       uses: actions/checkout@v4
       with:
-        repository: oracle/truffleruby
-        ref: ${{ needs.prepare.outputs.commit }}
+        repository: andrykonchin/truffleruby
+        ref: ak/update-joni-checksum
     - uses: actions/checkout@v4
       with:
         path: truffleruby-dev-builder
